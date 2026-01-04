@@ -6,7 +6,7 @@ import { Upload, Sparkles, ImageIcon, MessageSquare, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface TextInputProps {
-  onAnalyze: (text: string) => void;
+  onAnalyze: (text: string, image?: string) => void;
   isLoading: boolean;
 }
 
@@ -59,7 +59,7 @@ const TextInput = ({ onAnalyze, isLoading }: TextInputProps) => {
 
   const handleSubmit = () => {
     if (text.trim() || uploadedImage) {
-      onAnalyze(text.trim());
+      onAnalyze(text.trim(), uploadedImage || undefined);
     }
   };
 

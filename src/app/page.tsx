@@ -6,66 +6,30 @@ import ToxicityGauge from "@/components/toxicity-gauge";
 import ToxicityBreakdown from "@/components/toxicity-breakdown";
 import ShareableResult from "@/components/shareable-result";
 import { Sparkles } from "lucide-react";
-
-interface ToxicityResult {
-  score: number;
-  breakdown: {
-    type: string;
-    severity: "low" | "medium" | "high";
-    detected: boolean;
-  }[];
-}
-
-// Mock analysis function - will be replaced with AI integration
-const analyzeToxicity = async (text: string): Promise<ToxicityResult> => {
-  // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 2000));
-
-  // Simple mock analysis based on keywords
-  const toxicPatterns = {
-    Insults: /\b(stupid|idiot|dumb|loser|ugly|pathetic|worthless)\b/i,
-    Threats: /\b(kill|hurt|destroy|fight|punch|beat)\b/i,
-    Sarcasm: /\b(oh really|sure|yeah right|whatever|obviously)\b/i,
-    "Passive-aggressive": /\b(fine|whatever|I guess|if you say so|interesting)\b/i,
-    Gaslighting: /\b(crazy|imagining|overreacting|sensitive|dramatic)\b/i,
-    Condescending: /\b(actually|clearly|obviously|basically|just saying)\b/i,
-    Manipulation: /\b(always|never|should|must|have to|need to)\b/i,
-    Negativity: /\b(hate|worst|terrible|awful|horrible|disgusting)\b/i,
-  };
-
-  const breakdown = Object.entries(toxicPatterns).map(([type, pattern]) => {
-    const detected = pattern.test(text);
-    const matchCount = (text.match(pattern) || []).length;
-    let severity: "low" | "medium" | "high" = "low";
-    
-    if (matchCount >= 3) severity = "high";
-    else if (matchCount >= 2) severity = "medium";
-    
-    return { type, detected, severity };
-  });
-
-  const detectedCount = breakdown.filter((b) => b.detected).length;
-  const highSeverityCount = breakdown.filter((b) => b.detected && b.severity === "high").length;
-  
-  // Calculate score based on detection
-  let score = Math.min(100, detectedCount * 12 + highSeverityCount * 15);
-  
-  // Add some randomness for demo
-  score = Math.max(0, Math.min(100, score + Math.floor(Math.random() * 10) - 5));
-
-  return { score, breakdown };
-};
+import { ToxicityResult } from "@/types";
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<ToxicityResult | null>(null);
 
-  const handleAnalyze = async (text: string) => {
+  const handleAnalyze = async (text: string, image?: string) => {
     setIsLoading(true);
     setResult(null);
     
     try {
-      const analysis = await analyzeToxicity(text);
+      const response = await fetch("/api/result", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message: text, image }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Analysis failed");
+      }
+
+      const analysis: ToxicityResult = await response.json();
       setResult(analysis);
     } catch (error) {
       console.error("Analysis failed:", error);

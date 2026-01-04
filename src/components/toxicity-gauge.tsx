@@ -104,7 +104,7 @@ const ToxicityGauge = ({ score, isAnimating = true }: ToxicityGaugeProps) => {
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={animatedOffset}
-            className="transition-all duration-1500 ease-out"
+            className="transition-all duration-[1500ms] ease-out"
           />
         </svg>
         
