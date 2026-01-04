@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
+import {
+  CircularProgress,
+  CircularProgressIndicator,
+  CircularProgressTrack,
+  CircularProgressRange,
+  CircularProgressValueText,
+} from "@/components/ui/circular-progress";
 
 interface ToxicityGaugeProps {
   score: number;
@@ -9,10 +16,6 @@ interface ToxicityGaugeProps {
 
 const ToxicityGauge = ({ score, isAnimating = true }: ToxicityGaugeProps) => {
   const [displayScore, setDisplayScore] = useState(0);
-  const [animatedOffset, setAnimatedOffset] = useState(283);
-  
-  const circumference = 283;
-  const targetOffset = circumference - (score / 100) * circumference;
 
   useEffect(() => {
     if (isAnimating) {
@@ -31,24 +34,18 @@ const ToxicityGauge = ({ score, isAnimating = true }: ToxicityGaugeProps) => {
         }
       }, duration / steps);
 
-      const strokeTimer = setTimeout(() => {
-        setAnimatedOffset(targetOffset);
-      }, 100);
-
       return () => {
         clearInterval(timer);
-        clearTimeout(strokeTimer);
       };
     } else {
       setDisplayScore(score);
-      setAnimatedOffset(targetOffset);
     }
-  }, [score, isAnimating, targetOffset]);
+  }, [score, isAnimating]);
 
   const getColor = () => {
-    if (score <= 33) return "toxic-green";
-    if (score <= 66) return "toxic-orange";
-    return "toxic-red";
+    if (score <= 33) return "hsl(var(--toxic-green))";
+    if (score <= 66) return "hsl(var(--toxic-orange))";
+    return "hsl(var(--toxic-red))";
   };
 
   const getVerdict = () => {
@@ -64,9 +61,9 @@ const ToxicityGauge = ({ score, isAnimating = true }: ToxicityGaugeProps) => {
   };
 
   const getStrokeColor = () => {
-    if (score <= 33) return "hsl(var(--toxic-green))";
-    if (score <= 66) return "hsl(var(--toxic-orange))";
-    return "hsl(var(--toxic-red))";
+    if (score <= 33) return "text-toxic-green";
+    if (score <= 66) return "text-toxic-orange";
+    return "text-toxic-red";
   };
 
   const verdict = getVerdict();
@@ -80,54 +77,36 @@ const ToxicityGauge = ({ score, isAnimating = true }: ToxicityGaugeProps) => {
         transition={{ duration: 0.5, ease: "easeOut" }}
         className={cn("relative", getGlowClass(), "rounded-full p-4 transition-all duration-500")}
       >
-        <svg
-          className="transform -rotate-90 w-48 h-48 md:w-56 md:h-56"
-          viewBox="0 0 100 100"
+        <CircularProgress
+          value={displayScore}
+          max={100}
+          size={224}
+          thickness={8}
         >
-          {/* Background circle */}
-          <circle
-            cx="50"
-            cy="50"
-            r="45"
-            stroke="hsl(var(--muted))"
-            strokeWidth="8"
-            fill="none"
-          />
-          {/* Animated progress circle */}
-          <circle
-            cx="50"
-            cy="50"
-            r="45"
-            stroke={getStrokeColor()}
-            strokeWidth="8"
-            fill="none"
-            strokeLinecap="round"
-            strokeDasharray={circumference}
-            strokeDashoffset={animatedOffset}
-            className="transition-all duration-[1500ms] ease-out"
-          />
-        </svg>
-        
-        {/* Center content */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <motion.span 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.4 }}
-            className={cn(
-              "text-sm font-medium uppercase tracking-widest mb-1",
+          <CircularProgressIndicator>
+            <CircularProgressTrack className="text-muted" />
+            <CircularProgressRange className={cn(getStrokeColor(), "transition-all duration-100")} />
+          </CircularProgressIndicator>
+          <CircularProgressValueText className="flex flex-col items-center justify-center">
+            <motion.span 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.4 }}
+              className={cn(
+                "text-sm font-medium uppercase tracking-widest mb-1",
+                `text-${getColor()}`
+              )}
+            >
+              {verdict.label}
+            </motion.span>
+            <span className={cn(
+              "text-4xl md:text-5xl font-serif tracking-tight",
               `text-${getColor()}`
-            )}
-          >
-            {verdict.label}
-          </motion.span>
-          <span className={cn(
-            "text-4xl md:text-5xl font-serif tracking-tight",
-            `text-${getColor()}`
-          )}>
-            {displayScore}%
-          </span>
-        </div>
+            )}>
+              {displayScore}%
+            </span>
+          </CircularProgressValueText>
+        </CircularProgress>
       </motion.div>
 
       {/* Verdict text */}

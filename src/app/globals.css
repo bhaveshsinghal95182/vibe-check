@@ -3,6 +3,8 @@
 
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
 @theme {
   /* Font Family */
   --font-sans: "Outfit", sans-serif;
@@ -116,7 +118,7 @@
 
   --border: hsl(260 20% 88%);
   --input: hsl(260 20% 90%);
-  
+
   /* Updated to match Primary */
   --ring: hsl(220 90% 50%);
 
@@ -156,7 +158,7 @@
 
   --border: hsl(260 30% 20%);
   --input: hsl(260 30% 20%);
-  
+
   /* Updated to match Primary */
   --ring: hsl(220 90% 55%);
 
@@ -176,7 +178,7 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
   }
-  
+
   /* Added letter spacing to headings */
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Instrument Serif', serif;
@@ -277,4 +279,25 @@
 
 .read-the-docs {
   color: #888;
+}
+
+@theme inline {
+  --animate-spin-around: spin-around 0.8s linear infinite;
+  @keyframes spin-around {
+  0% {
+    transform: rotate(-90deg);
+    }
+  100% {
+    transform: rotate(270deg);
+    }
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
